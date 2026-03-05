@@ -1,66 +1,72 @@
-#include <stdio.h> // Diperlukan untuk fungsi input/output seperti printf dan scanf
-#include <stdlib.h> // Diperlukan untuk fungsi exit() untuk menghentikan program
-
-#define MAX_N 1000 // Menetapkan batas maksimum untuk jumlah nilai yang bisa diinput
+#include <stdio.h>
+#include <stdlib.h> // Diperlukan untuk malloc dan free
+#include <limits.h> // Diperlukan untuk INT_MAX dan INT_MIN
 
 int main() {
-    int n;
-    // Mendeklarasikan array untuk menyimpan semua nilai yang diinput
-    // Menggunakan ukuran MAX_N untuk menghindari alokasi dinamis yang lebih kompleks untuk kasus ini.
-    double values[MAX_N];
-    double sum = 0.0;
+    int n, i;
+    int *scores; // Pointer untuk menyimpan nilai-nilai tugas
+    long long sum = 0;
     double average;
-    int i;
-    int scan_result;
-    int count_above_average = 0; // Variabel untuk menyimpan hitungan nilai di atas/sama dengan rata-rata
+    int count_above_average = 0;
+    int min_score = INT_MAX; // Inisialisasi dengan nilai maksimum integer
+    int max_score = INT_MIN; // Inisialisasi dengan nilai minimum integer
 
-    // --- Membaca jumlah nilai (n) ---
-    scan_result = scanf("%d", &n);
+    // Membaca nilai n
+    scanf("%d", &n);
 
-    // Penanganan kesalahan untuk input n
-    if (scan_result != 1) { // Jika scanf tidak berhasil membaca satu integer
-        fprintf(stderr, "Error: Input 'n' tidak valid. Harap masukkan bilangan bulat.\n");
-        return 1; // Keluar dengan kode error
-    }
-    if (n <= 0) { // Jika n adalah nol atau negatif
-        fprintf(stderr, "Error: Input 'n' harus bilangan bulat positif.\n");
-        return 1; // Keluar dengan kode error
-    }
-    if (n > MAX_N) { // Penanganan kesalahan jika n melebihi kapasitas array
-        fprintf(stderr, "Error: Jumlah nilai 'n' terlalu besar (maksimal %d). Gunakan nilai yang lebih kecil.\n", MAX_N);
+    // Alokasi memori untuk menyimpan nilai-nilai
+    scores = (int *)malloc(n * sizeof(int));
+    if (scores == NULL) {
+        // Penanganan error jika alokasi memori gagal
         return 1;
     }
 
-    // --- Membaca n buah nilai dan menyimpannya ke array, sekaligus menghitung jumlahnya ---
+    // Membaca n nilai tugas mahasiswa, menghitung total, serta mencari min dan max
     for (i = 0; i < n; i++) {
-        scan_result = scanf("%lf", &values[i]); // Membaca setiap nilai sebagai double dan menyimpannya ke array
+        scanf("%d", &scores[i]);
+        sum += scores[i];
 
-        // Penanganan kesalahan untuk setiap nilai
-        if (scan_result != 1) {
-            fprintf(stderr, "Error: Input nilai ke-%d tidak valid. Harap masukkan bilangan.\n", i + 1);
-            return 1; // Keluar dengan kode error
+        if (scores[i] < min_score) {
+            min_score = scores[i];
         }
-        sum += values[i]; // Menambahkan nilai ke total jumlah
-    }
-
-    // --- Menampilkan hasil yang pertama (Jumlah) ---
-    printf("%.0lf\n", sum);
-
-    // --- Menghitung rata-rata ---
-    average = sum / n;
-
-    // --- Menampilkan hasil yang kedua (Rata-rata) ---
-    printf("%.2lf\n", average);
-
-    // --- Menghitung banyaknya nilai yang di atas atau sama dengan rata-rata ---
-    for (i = 0; i < n; i++) {
-        if (values[i] >= average) { // Membandingkan setiap nilai dalam array dengan rata-rata
-            count_above_average++; // Jika kondisi terpenuhi, increment counter
+        if (scores[i] > max_score) {
+            max_score = scores[i];
         }
     }
 
-    // --- Menampilkan hasil yang ketiga (Banyaknya nilai di atas/sama dengan rata-rata) ---
+    // Menghitung rata-rata
+    if (n > 0) {
+        average = (double)sum / n;
+    } else {
+        average = 0.0; // Jika n adalah 0, rata-rata juga 0
+    }
+
+    // Menghitung banyaknya mahasiswa yang nilainya di atas atau sama dengan rata-rata
+    for (i = 0; i < n; i++) {
+        if (scores[i] >= average) {
+            count_above_average++;
+        }
+    }
+
+    // Mencetak total nilai
+    printf("%lld\n", sum);
+
+    // Mencetak rata-rata dengan 2 digit presisi di belakang koma
+    printf("%.2f\n", average);
+
+    // Mencetak banyaknya mahasiswa yang nilainya di atas atau sama dengan rata-rata
     printf("%d\n", count_above_average);
 
-    return 0; // Mengembalikan 0 menandakan program berhasil dieksekusi
+    // Mencetak rentang nilai (max_score - min_score)
+    // Periksa jika n > 0 untuk menghindari masalah jika tidak ada nilai
+    if (n > 0) {
+        printf("%d\n", max_score - min_score);
+    } else {
+        printf("0\n"); // Atau penanganan lain jika tidak ada nilai
+    }
+
+    // Membebaskan memori yang dialokasikan
+    free(scores);
+
+    return 0;
 }
